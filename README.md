@@ -9,7 +9,7 @@
 
 ## 📖 Overview
 
-Professional toolset for automated management of critical Windows services including:
+Toolset for automated management of critical Windows services including:
 
 ✅ **Remote Desktop Services**  
 ✅ **Network Configuration Utilities**  
@@ -42,8 +42,29 @@ Professional toolset for automated management of critical Windows services inclu
 ```powershell
 # Create script directory
 New-Item -Path "C:\Scripts" -ItemType Directory -Force
-
 # Copy files
 Copy-Item -Path ".\Enable-RDPServices.ps1" -Destination "C:\Scripts"
 Copy-Item -Path ".\Enable-ScheduledTask.ps1" -Destination "C:\Scripts"
+```
 
+### 2. Register Auto-Start Task
+
+powershell -ExecutionPolicy Bypass -File "C:\Scripts\Enable-ScheduledTask.ps1"
+
+### 3. Service Disablement for Test
+```powershell
+# Disabled service
+"SessionEnv", "TermService", "UmRdpService", "iphlpsvc" | ForEach-Object {
+    Stop-Service $_ -Force -ErrorAction SilentlyContinue
+    Set-Service $_ -StartupType Disabled -ErrorAction SilentlyContinue
+}
+
+# Verify status
+Get-Service -Name "SessionEnv", "TermService", "UmRdpService", "iphlpsvc" |
+    Select-Object Name, Status, StartType |
+    Format-Table -AutoSize
+```
+### 4. System Reboot
+```powershell
+Restart-Computer -Confirm
+```
